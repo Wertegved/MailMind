@@ -98,6 +98,14 @@ export const clientQueue = (cs: Conversation[]): Conversation[] =>
     .sort((a, b) => Number(matchesSegment(b, 'important')) - Number(matchesSegment(a, 'important')) || byRecent(a, b));
 
 export function needsAttention(cs: Conversation[]): Conversation[] {
+  const priority = (c: Conversation) => {
+    if (c.reviewState === 'needs_review') return 0;
+    if (effectiveResponsibility(c) === 'client_to_reply') return 1;
+    if (effectiveResponsibility(c) === 'assistant_to_reply') return 2;
+    if (c.unread) return 3;
+    return 4;
+  };
+
   return cs
     .filter((c) => {
       if (c.archived || c.completed) return false;
@@ -108,7 +116,10 @@ export function needsAttention(cs: Conversation[]): Conversation[] {
         Boolean(c.ai?.actionItems.some((item) => !item.done)) ||
         ((responsibility === 'assistant_to_reply' || responsibility === 'client_to_reply') && isAwaitingOurReply(c));
     })
-    .sort(byRecent);
+    .sort((a, b) => {
+      const diff = priority(a) - priority(b);
+      return diff !== 0 ? diff : byRecent(a, b);
+    });
 }
 
 export interface UpcomingDate {

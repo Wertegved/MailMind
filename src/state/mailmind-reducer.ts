@@ -178,7 +178,7 @@ export function reducer(state: AppState, action: Action): AppState {
             reviewState: 'confirmed',
           },
           action.by,
-          action.note ?? `Set to ${RESPONSIBILITY_LABEL[action.value]}`,
+          `Set to ${RESPONSIBILITY_LABEL[action.value]}`,
           action.now,
         ),
       );
@@ -228,21 +228,27 @@ export function reducer(state: AppState, action: Action): AppState {
         : c);
 
     case 'ANALYSIS_FAILED':
-      return update(state, action.id, (c) =>
-        c.analysisRequestId === action.requestId && !hasInboundMessageSince(c, action.messageCount)
+      return update(state, action.id, (c) => {
+        const matchesRequest = !c.analysisRequestId || action.requestId === undefined || c.analysisRequestId === action.requestId;
+        const isFresh = !c.analysisRequestId || !hasInboundMessageSince(c, action.messageCount);
+        return matchesRequest && isFresh
           ? {
             ...c,
             analysisStatus: 'error',
             analysisError: action.error,
             analysisRequestId: undefined,
           }
-          : c);
+          : c;
+      });
 
     case 'APPLY_ANALYSIS':
-      return update(state, action.id, (c) =>
-        c.analysisRequestId === action.requestId && !hasInboundMessageSince(c, action.messageCount)
+      return update(state, action.id, (c) => {
+        const matchesRequest = !c.analysisRequestId || action.requestId === undefined || c.analysisRequestId === action.requestId;
+        const isFresh = !c.analysisRequestId || !hasInboundMessageSince(c, action.messageCount);
+        return matchesRequest && isFresh
           ? applyAnalysis(c, action.analysis, action.now)
-          : c);
+          : c;
+      });
 
     case 'ADD_MESSAGE':
       return update(state, action.id, (c) => {
@@ -257,6 +263,7 @@ export function reducer(state: AppState, action: Action): AppState {
           analysisRequestId: inbound ? undefined : c.analysisRequestId,
           reclassifiedFrom: inbound ? undefined : c.reclassifiedFrom,
           pendingSuggestion: inbound ? undefined : c.pendingSuggestion,
+          override: inbound ? undefined : c.override,
           // A new inbound message reopens a handled or archived thread.
           completed: inbound ? false : c.completed,
           archived: inbound ? false : c.archived,

@@ -10,7 +10,7 @@ export default {
       colors: {
         canvas: '#F4F5F8',
         surface: '#FFFFFF',
-        ink: { DEFAULT: '#1A1D2E', soft: '#3D4157', muted: '#666B82', faint: '#626879' },
+        ink: { DEFAULT: '#1A1D2E', soft: '#3D4157', muted: '#555A6E', faint: '#626879' },
         line: { DEFAULT: '#E4E6EE', strong: '#CDD0DD' },
         brand: { DEFAULT: '#3F4FE0', soft: '#ECEEFD', deep: '#2B38B5' },
         client: { DEFAULT: '#C42B6B', soft: '#FCEAF2' },
